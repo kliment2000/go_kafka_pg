@@ -2,10 +2,11 @@ package main
 
 import (
 	"log"
-	"wb_l01/cache"
-	"wb_l01/consumer"
-	"wb_l01/db"
-	"wb_l01/server"
+
+	"github.com/kliment2000/go_kafka_pg/cache"
+	"github.com/kliment2000/go_kafka_pg/consumer"
+	"github.com/kliment2000/go_kafka_pg/db"
+	"github.com/kliment2000/go_kafka_pg/server"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module wb_l01
+module github.com/kliment2000/go_kafka_pg
 
 go 1.24
 

@@ -2,7 +2,8 @@ package cache
 
 import (
 	"sync"
-	"wb_l01/db"
+
+	"github.com/kliment2000/go_kafka_pg/db"
 )
 
 type CachedOrder struct {

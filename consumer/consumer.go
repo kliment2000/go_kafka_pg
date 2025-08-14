@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"wb_l01/cache"
-	"wb_l01/db"
+	"github.com/kliment2000/go_kafka_pg/cache"
+	"github.com/kliment2000/go_kafka_pg/db"
 
 	"github.com/segmentio/kafka-go"
 )

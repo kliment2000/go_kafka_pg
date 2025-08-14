@@ -2,8 +2,9 @@ package server
 
 import (
 	"net/http"
-	"wb_l01/cache"
-	"wb_l01/db"
+
+	"github.com/kliment2000/go_kafka_pg/cache"
+	"github.com/kliment2000/go_kafka_pg/db"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
