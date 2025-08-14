@@ -8,7 +8,7 @@ import (
 
 type CachedOrder struct {
 	OrderUID string
-	Data     interface{} // готовый распарсенный JSON
+	Data     interface{}
 }
 
 type orderCache struct {

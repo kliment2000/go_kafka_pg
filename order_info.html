@@ -67,7 +67,6 @@
 
                 const orderData = await response.json();
 
-                // Отобразить информацию о заказе
                 document.getElementById('order-info').style.display = 'block';
                 document.getElementById('order-details').textContent = JSON.stringify(orderData, null, 2);
             } catch (error) {
