@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #order-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            display: none;
+        }
+        input[type="text"] {
+            padding: 8px;
+            font-size: 14px;
+            margin-right: 10px;
+            width: 250px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Order Information</h1>
+    <p>Enter the Order UID to get the information:</p>
+    
+    <input type="text" id="orderUid" placeholder="Enter Order UID" />
+    <button onclick="getOrderInfo()">Get Order Info</button>
+
+    <div id="order-info">
+        <h3>Order Details:</h3>
+        <pre id="order-details"></pre>
+    </div>
+
+    <script>
+        async function getOrderInfo() {
+            const orderUid = document.getElementById('orderUid').value;
+            
+            if (!orderUid) {
+                alert("Please enter a valid order UID");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8081/order/${orderUid}`);
+                
+                if (!response.ok) {
+                    throw new Error("Order not found or API error");
+                }
+
+                const orderData = await response.json();
+
+                // Отобразить информацию о заказе
+                document.getElementById('order-info').style.display = 'block';
+                document.getElementById('order-details').textContent = JSON.stringify(orderData, null, 2);
+            } catch (error) {
+                alert("Error fetching order data: " + error.message);
+            }
+        }
+    </script>
+
+</body>
+</html>
