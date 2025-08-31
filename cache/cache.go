@@ -1,40 +1,58 @@
 package cache
 
 import (
-	"sync"
+	"container/heap"
+	"time"
 
-	"github.com/kliment2000/go_kafka_pg/db"
+	"github.com/kliment2000/go_kafka_pg/database"
 )
 
-type CachedOrder struct {
-	OrderUID string
-	Data     interface{}
+type LRUCache struct {
+	capacity int
+	items    map[string]*Item
+	pq       PriorityQueue
 }
 
-type orderCache struct {
-	mu     sync.RWMutex
-	orders map[string]CachedOrder
+func NewLRUCache(cap int) *LRUCache {
+	return &LRUCache{
+		capacity: cap,
+		items:    make(map[string]*Item),
+		pq:       make(PriorityQueue, 0, cap),
+	}
 }
 
-var Cache = &orderCache{
-	orders: make(map[string]CachedOrder),
+var Cache = NewLRUCache(100)
+
+func (c *LRUCache) Get(key string) (interface{}, bool) {
+	if item, ok := c.items[key]; ok {
+		c.pq.update(item, item.value, time.Now().UnixNano())
+		return item.value, true
+	}
+	return "", false
 }
 
-func (c *orderCache) SetOrder(order CachedOrder) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.orders[order.OrderUID] = order
+func (c *LRUCache) Put(key string, value interface{}) {
+	if item, ok := c.items[key]; ok {
+		c.pq.update(item, value, time.Now().UnixNano())
+		return
+	}
+
+	if len(c.items) >= c.capacity {
+		oldest := heap.Pop(&c.pq).(*Item)
+		delete(c.items, oldest.key)
+	}
+
+	item := &Item{
+		key:      key,
+		value:    value,
+		priority: time.Now().UnixNano(),
+	}
+	heap.Push(&c.pq, item)
+	c.items[key] = item
 }
 
-func (c *orderCache) GetOrder(orderUID string) (CachedOrder, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	order, ok := c.orders[orderUID]
-	return order, ok
-}
-
-func (c *orderCache) LoadFromDB() error {
-	orders, err := db.GetAllOrders()
+func (c *LRUCache) LoadFromDB() error {
+	orders, err := database.GetLastOrders(100)
 
 	if err != nil {
 		return err
@@ -45,10 +63,7 @@ func (c *orderCache) LoadFromDB() error {
 		if err := o.UnmarshalData(&jsonData); err != nil {
 			return err
 		}
-		c.SetOrder(CachedOrder{
-			OrderUID: o.OrderUID,
-			Data:     jsonData,
-		})
+		c.Put(o.OrderUID, jsonData)
 	}
 
 	return nil

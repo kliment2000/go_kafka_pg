@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/kliment2000/go_kafka_pg/cache"
-	"github.com/kliment2000/go_kafka_pg/db"
+	"github.com/kliment2000/go_kafka_pg/database"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -46,35 +46,32 @@ func StartKafkaConsumer() {
 			continue
 		}
 
-		tx, err := db.BeginTransaction()
+		tx, err := database.BeginTransaction()
 		if err != nil {
 			log.Printf("failed to begin transaction for order %s: %v\n", orderUID, err)
 			continue
 		}
 
-		err = db.InsertOrderWithTx(tx, &db.Order{
+		err = database.InsertOrderWithTx(tx, &database.Order{
 			OrderUID: orderUID,
 			Data:     m.Value,
 		})
 		if err != nil {
-			log.Printf("db insert error for order %s: %v\n", orderUID, err)
-			db.RollbackTransaction(tx)
+			log.Printf("database insert error for order %s: %v\n", orderUID, err)
+			database.RollbackTransaction(tx)
 			continue
 		}
 
-		cache.Cache.SetOrder(cache.CachedOrder{
-			OrderUID: orderUID,
-			Data:     parsed,
-		})
+		cache.Cache.Put(orderUID, parsed)
 
 		err = r.CommitMessages(context.Background(), m)
 		if err != nil {
 			log.Printf("failed to commit message %s: %v\n", m.Key, err)
-			db.RollbackTransaction(tx)
+			database.RollbackTransaction(tx)
 			continue
 		}
 
-		db.CommitTransaction(tx)
+		database.CommitTransaction(tx)
 		fmt.Printf("Order %s successfully processed\n", orderUID)
 	}
 }

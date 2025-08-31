@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kliment2000/go_kafka_pg/cache"
-	"github.com/kliment2000/go_kafka_pg/db"
+	"github.com/kliment2000/go_kafka_pg/database"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -21,10 +21,10 @@ func Start() {
 	e.GET("/order/:order_uid", func(c echo.Context) error {
 		orderUID := c.Param("order_uid")
 
-		if order, ok := cache.Cache.GetOrder(orderUID); ok {
-			return c.JSON(http.StatusOK, order.Data)
+		if order, ok := cache.Cache.Get(orderUID); ok {
+			return c.JSON(http.StatusOK, order)
 		}
-		if order, err := db.GetOrder(orderUID); err == nil {
+		if order, err := database.GetOrder(orderUID); err == nil {
 			return c.JSON(http.StatusOK, order.Data)
 		}
 

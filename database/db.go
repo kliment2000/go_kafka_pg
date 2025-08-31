@@ -1,9 +1,10 @@
-package db
+package database
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
@@ -11,8 +12,9 @@ import (
 )
 
 type Order struct {
-	OrderUID string         `gorm:"primaryKey"`
-	Data     datatypes.JSON `gorm:"type:jsonb"`
+	OrderUID  string         `gorm:"primaryKey"`
+	Data      datatypes.JSON `gorm:"type:jsonb"`
+	Timestamp time.Time
 }
 
 var DB *gorm.DB
@@ -43,9 +45,9 @@ func GetOrder(uid string) (*Order, error) {
 	return &order, err
 }
 
-func GetAllOrders() ([]Order, error) {
+func GetLastOrders(limit int) ([]Order, error) {
 	var orders []Order
-	err := DB.Find(&orders).Error
+	err := DB.Order("timestamp desc").Limit(limit).Find(&orders).Error
 	return orders, err
 }
 
