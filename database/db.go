@@ -3,7 +3,6 @@ package database
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"gorm.io/datatypes"
@@ -41,7 +40,6 @@ func InsertOrderWithTx(tx *gorm.DB, order *Order) error {
 func GetOrder(uid string) (*Order, error) {
 	var order Order
 	err := DB.First(&order, "order_uid = ?", uid).Error
-	fmt.Println(err)
 	return &order, err
 }
 
